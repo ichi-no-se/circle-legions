@@ -95,6 +95,12 @@ class Lasso {
     getPoints() {
         return this.points;
     }
+
+    isInside(point: Phaser.Math.Vector2): boolean {
+        if (!this.evalLastLine()) return false;
+        return Phaser.Geom.Polygon.ContainsPoint(new Phaser.Geom.Polygon(this.points), new Phaser.Geom.Point(point.x, point.y));
+    }
+
     draw(graphics: Phaser.GameObjects.Graphics, clear = true) {
         if (clear) graphics.clear();
         if (this.points.length < 2) return;
@@ -160,6 +166,9 @@ export class PlayScene extends Phaser.Scene {
     private graphics!: Phaser.GameObjects.Graphics;
     private lasso = new Lasso();
 
+    private dots: Phaser.GameObjects.Arc[] = [];
+    private dotCount = 100;
+
     constructor() {
         super({ key: "PlayScene" });
     }
@@ -170,8 +179,15 @@ export class PlayScene extends Phaser.Scene {
     // シーンのセットアップ
     create() {
         this.cameras.main.setBackgroundColor(0x101015);
-
         this.graphics = this.add.graphics();
+
+        // ランダムな点を配置
+        for (let i = 0; i < this.dotCount; i++) {
+            const x = Phaser.Math.Between(20, this.scale.width - 20);
+            const y = Phaser.Math.Between(20, this.scale.height - 20);
+            const dot = this.add.circle(x, y, 3, 0xffffff);
+            this.dots.push(dot);
+        }
 
         // T キーで TitleScene へ遷移する例（データを渡す）
         this.input.keyboard?.once("keydown-T", () => {
@@ -180,9 +196,11 @@ export class PlayScene extends Phaser.Scene {
 
         this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
             this.lasso.init();
+            this.resetDotColors();
             this.lasso.setDrawing(true);
             this.lasso.addPoint(new Phaser.Math.Vector2(pointer.x, pointer.y));
             this.lasso.draw(this.graphics, true);
+            this.updateDotColors();
         });
 
         this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
@@ -190,22 +208,47 @@ export class PlayScene extends Phaser.Scene {
             if (!drawing) return;
             this.lasso.addPoint(new Phaser.Math.Vector2(pointer.x, pointer.y));
             this.lasso.draw(this.graphics, true);
+            this.updateDotColors();
         });
 
         this.input.on('pointerup', () => {
             if (!this.lasso.getDrawing()) return;
             this.lasso.setDrawing(false);
             this.lasso.draw(this.graphics, false);
+            this.updateDotColors();
         });
 
         this.input.keyboard?.once("keydown-C", () => {
             this.lasso.init();
             this.lasso.draw(this.graphics, false);
+            this.resetDotColors();
         });
 
     }
 
     // 毎フレームの更新（必要になったら使う）
     update(_time: number, _delta: number) {
+    }
+
+    private resetDotColors() {
+        this.dots.forEach(dot => {
+            dot.setFillStyle(0xffffff);
+        });
+    }
+
+    private updateDotColors() {
+        if (!this.lasso.evalLastLine()) {
+            this.resetDotColors();
+            return;
+        }
+        for (const dot of this.dots) {
+            const inside = this.lasso.isInside(new Phaser.Math.Vector2(dot.x, dot.y));
+            if (inside) {
+                dot.setFillStyle(0x22cc66);
+            }
+            else {
+                dot.setFillStyle(0xffffff);
+            }
+        }
     }
 }
