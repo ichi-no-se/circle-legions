@@ -5,6 +5,7 @@ import { PlayScene } from "./scenes/PlayScene";
 new Phaser.Game({
     type: Phaser.AUTO,
     backgroundColor: "#101015",
-    scale: { mode: Phaser.Scale.RESIZE, autoCenter: Phaser.Scale.CENTER_BOTH, width: "100%", height: "100%" },
+    width: 800,
+    height: 600,
     scene: [TitleScene, PlayScene],
 });
