@@ -2,10 +2,12 @@
 import Phaser from "phaser";
 import { Lasso } from "../objects/Lasso";
 import { InputService } from "../input/InputService";
+import { Infantry } from "../units/Infantry";
 
 export class PlayScene extends Phaser.Scene {
     private lasso!: Lasso;
     private inputService!: InputService;
+    private infantry!: Infantry;
 
     private dots: Phaser.GameObjects.Arc[] = [];
     private dotCount = 100;
@@ -22,6 +24,7 @@ export class PlayScene extends Phaser.Scene {
         this.lasso = new Lasso(this.add.graphics());
         this.inputService = new InputService(this);
         this.cameras.main.setBackgroundColor(0x101015);
+        this.infantry = new Infantry(this, new Phaser.Math.Vector2(400, 300), 0);
 
         // ランダムな点を配置
         for (let i = 0; i < this.dotCount; i++) {
@@ -46,6 +49,7 @@ export class PlayScene extends Phaser.Scene {
         this.lasso.draw();
         this.updateDotColors();
         this.inputService.endFrame();
+        this.infantry.update(_delta);
     }
 
     private resetDotColors() {
