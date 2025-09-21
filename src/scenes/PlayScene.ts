@@ -1,16 +1,17 @@
 // src/scenes/PlayScene.ts
 import Phaser from "phaser";
 import { Lasso } from "../objects/Lasso";
+import { Route } from "../objects/Route";
 import { InputService } from "../input/InputService";
 import { Infantry } from "../units/Infantry";
 
 export class PlayScene extends Phaser.Scene {
     private lasso!: Lasso;
+    private route!: Route;
     private inputService!: InputService;
-    private infantry!: Infantry;
-
-    private dots: Phaser.GameObjects.Arc[] = [];
-    private dotCount = 100;
+    private infantry!: Infantry[];
+    private infantryCount = 200;
+    private nowDrawing!: 'Lasso' | 'Route' | 'None';
 
     constructor() {
         super({ key: "PlayScene" });
@@ -22,16 +23,18 @@ export class PlayScene extends Phaser.Scene {
     // シーンのセットアップ
     create() {
         this.lasso = new Lasso(this.add.graphics());
+        this.route = new Route(this.add.graphics());
         this.inputService = new InputService(this);
         this.cameras.main.setBackgroundColor(0x101015);
-        this.infantry = new Infantry(this, new Phaser.Math.Vector2(400, 300), 0);
+        this.infantry = [];
+        this.nowDrawing = 'None';
 
-        // ランダムな点を配置
-        for (let i = 0; i < this.dotCount; i++) {
+        // ランダムに歩兵を配置
+        for (let i = 0; i < this.infantryCount; i++) {
             const x = Phaser.Math.Between(20, this.scale.width - 20);
             const y = Phaser.Math.Between(20, this.scale.height - 20);
-            const dot = this.add.circle(x, y, 3, 0xffffff);
-            this.dots.push(dot);
+            const infantry = new Infantry(this, new Phaser.Math.Vector2(x, y));
+            this.infantry.push(infantry);
         }
 
         // T キーで TitleScene へ遷移する例（データを渡す）
@@ -42,35 +45,54 @@ export class PlayScene extends Phaser.Scene {
 
     // 毎フレームの更新（必要になったら使う）
     update(_time: number, _delta: number) {
-        this.lasso.update(this.inputService.intent);
-        if (this.inputService.intent.isDown === false) {
-            this.lasso.clear();
+        if (this.nowDrawing === 'None') {
+            if (this.inputService.intent.isDown) {
+                let anySelected = false;
+                for (const infantry of this.infantry) {
+                    anySelected = anySelected || infantry.isSelected();
+                }
+                if (anySelected) {
+                    this.nowDrawing = 'Route';
+                } else {
+                    this.nowDrawing = 'Lasso';
+                }
+            }
         }
-        this.lasso.draw();
-        this.updateDotColors();
-        this.inputService.endFrame();
-        this.infantry.update(_delta);
-    }
-
-    private resetDotColors() {
-        this.dots.forEach(dot => {
-            dot.setFillStyle(0xffffff);
-        });
-    }
-
-    private updateDotColors() {
-        if (!this.lasso.isValid()) {
-            this.resetDotColors();
-            return;
-        }
-        for (const dot of this.dots) {
-            const inside = this.lasso.isInside(new Phaser.Math.Vector2(dot.x, dot.y));
-            if (inside) {
-                dot.setFillStyle(0x22cc66);
+        if (this.nowDrawing === 'Lasso') {
+            this.lasso.update(this.inputService.intent);
+            if (this.lasso.isValid()) {
+                for (const infantry of this.infantry) {
+                    infantry.setSelected(this.lasso.contains(infantry.getPosition()));
+                }
             }
             else {
-                dot.setFillStyle(0xffffff);
+                for (const infantry of this.infantry) {
+                    infantry.setSelected(false);
+                }
             }
+            if (this.inputService.intent.isDown === false) {
+                this.nowDrawing = 'None';
+                this.lasso.clear();
+            }
+            this.lasso.draw();
+        }
+        if (this.nowDrawing === 'Route') {
+            this.route.update(this.inputService.intent);
+            if (this.inputService.intent.isDown === false) {
+                for (const infantry of this.infantry) {
+                    if (infantry.isSelected()) {
+                        infantry.setRoute(this.route.getRandomSampledPoints(20));
+                        infantry.setSelected(false);
+                    }
+                }
+                this.route.clear();
+                this.nowDrawing = 'None';
+            }
+            this.route.draw();
+        }
+        this.inputService.endFrame();
+        for (const infantry of this.infantry) {
+            infantry.update(_delta);
         }
     }
 }

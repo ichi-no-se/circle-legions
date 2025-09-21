@@ -107,7 +107,7 @@ export class Lasso {
 		return this.evalLastPoint();
 	}
 
-	isInside(point: Phaser.Math.Vector2): boolean {
+	contains(point: Phaser.Math.Vector2): boolean {
 		if (!this.evalLastPoint()) return false;
 		const poly = new Phaser.Geom.Polygon(this.points);
 		return Phaser.Geom.Polygon.ContainsPoint(poly, new Phaser.Geom.Point(point.x, point.y));
