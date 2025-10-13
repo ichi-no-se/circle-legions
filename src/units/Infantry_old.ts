@@ -2,29 +2,6 @@ import Phaser from 'phaser';
 
 type state = 'Idle' | 'RandomWalk' | 'GuidedWalk' | 'Combat' | 'Dead';
 
-const UNIT_TEXTURE_KEY = 'unitTexture';
-
-export function ensureUnitTexture(scene: Phaser.Scene) {
-	if (scene.textures.exists(UNIT_TEXTURE_KEY)) {
-		return UNIT_TEXTURE_KEY;
-	}
-	const graphics = scene.add.graphics();
-	const WIDTH = 10;
-	const HEIGHT = 8;
-	graphics.fillStyle(0xffffff, 1);
-	graphics.beginPath();
-	graphics.moveTo(0, 0);
-	graphics.lineTo(WIDTH, HEIGHT / 2);
-	graphics.lineTo(0, HEIGHT);
-	graphics.lineTo(WIDTH / 4, HEIGHT / 2);
-	graphics.closePath();
-	graphics.fillPath();
-
-	graphics.generateTexture(UNIT_TEXTURE_KEY, WIDTH, HEIGHT);
-	graphics.destroy();
-	return UNIT_TEXTURE_KEY;
-}
-
 export class Infantry {
 	private state: state;
 	private pos: Phaser.Math.Vector2;
