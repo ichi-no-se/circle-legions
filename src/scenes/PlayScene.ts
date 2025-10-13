@@ -3,13 +3,12 @@ import Phaser from "phaser";
 import { LassoAndRouteManager } from "../interaction/LassoAndRouteManager";
 import { InputService } from "../input/InputService";
 import { World } from "../core/World";
-import { PlayerDecisionController } from "../controllers/Player/PlayerController";
-import { PlayerVisualController } from "../controllers/Player/PlayerController";
+import { PlayerDecisionController, PlayerVisualController } from "../controllers/PlayerController";
+import { EnemyDecisionControllerChase, EnemyVisualController } from "../controllers/EnemyController";
 
 export class PlayScene extends Phaser.Scene {
     private inputService!: InputService;
     private world!: World;
-    private infantryCount = 200;
     private lassoAndRouteManager!: LassoAndRouteManager;
 
     constructor() {
@@ -26,11 +25,20 @@ export class PlayScene extends Phaser.Scene {
         this.cameras.main.setBackgroundColor(0x101015);
         this.lassoAndRouteManager = new LassoAndRouteManager(this);
 
-        // ランダムに歩兵を配置
-        for (let i = 0; i < this.infantryCount; i++) {
-            const x = Phaser.Math.Between(20, this.scale.width - 20);
-            const y = Phaser.Math.Between(20, this.scale.height - 20);
-            this.world.addUnit({ maxHp: 100, maxSpeed: 20, detectRange: 100, attackRange: 100, attackInterval: 1, attackDamage: 10, faction: "Player" }, undefined, new Phaser.Math.Vector2(x, y), Math.random() * Math.PI * 2, new PlayerDecisionController(), new PlayerVisualController());
+        for (let i = 0; i < 5; i++) {
+            for (let j = 0; j < 5; j++) {
+                const x = 100 + i * 40;
+                const y = 100 + j * 100;
+                this.world.addUnit({ maxHp: 100, maxSpeed: 10, detectRange: 100, attackRange: 100, attackInterval: 1, attackDamage: 10, faction: "Player" }, undefined, new Phaser.Math.Vector2(x, y), 0, new PlayerDecisionController(), new PlayerVisualController());
+            }
+        }
+
+        for (let i = 0; i < 5; i++) {
+            for (let j = 0; j < 5; j++) {
+                const x = 700 - i * 40;
+                const y = 500 - j * 100;
+                this.world.addUnit({ maxHp: 100, maxSpeed: 10, detectRange: 100, attackRange: 100, attackInterval: 1, attackDamage: 10, faction: "Enemy" }, undefined, new Phaser.Math.Vector2(x, y), Math.PI, new EnemyDecisionControllerChase(), new EnemyVisualController());
+            }
         }
 
         // T キーで TitleScene へ遷移する例（データを渡す）
@@ -39,7 +47,6 @@ export class PlayScene extends Phaser.Scene {
         });
     }
 
-    // 毎フレームの更新（必要になったら使う）
     update(_time: number, _delta: number) {
         this.lassoAndRouteManager.update(this.inputService.intent, this.world);
         this.inputService.endFrame();

@@ -3,8 +3,8 @@ import { Lasso } from "./Lasso";
 import { Route } from "./Route";
 import { World } from "../core/World";
 import type { InputIntent } from "../input/InputService";
-import { PlayerDecisionController } from "../controllers/Player/PlayerController";
-import { PlayerVisualController } from "../controllers/Player/PlayerController";
+import { PlayerDecisionController } from "../controllers/PlayerController";
+import { PlayerVisualController } from "../controllers/PlayerController";
 
 export class LassoAndRouteManager {
     private lasso: Lasso;

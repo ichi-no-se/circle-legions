@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
-import { type DecisionController, type VisualController, Unit, type MoveIntent } from '../../core/Unit';
-import { World } from '../../core/World';
-import { createArrowTexture } from "../../util/Textures";
+import { type DecisionController, type VisualController, Unit, type MoveIntent } from '../core/Unit';
+import { World } from '../core/World';
+import { createArrowTexture } from "../util/Textures";
 
 
 export class PlayerDecisionController implements DecisionController {
