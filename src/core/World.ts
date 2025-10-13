@@ -1,18 +1,20 @@
 import Phaser from 'phaser';
 import { Unit } from './Unit';
-import type { Intent, Controller, UnitSpec } from './Unit';
+import type { MoveIntent, VisualController, DecisionController, UnitSpec } from './Unit';
 
 export class World {
     private units: Map<number, Unit>;
     private idCounter: number;
+    private scene: Phaser.Scene;
 
-    constructor() {
+    constructor(scene: Phaser.Scene) {
         this.units = new Map();
         this.idCounter = 0;
+        this.scene = scene;
     }
 
-    addUnit(spec: UnitSpec, sprite?: Phaser.GameObjects.Image, pos?: Phaser.Math.Vector2, angle?: number, controller?: Controller): Unit {
-        const unit = new Unit(this.idCounter, spec, pos, angle, sprite, controller);
+    addUnit(spec: UnitSpec, sprite?: Phaser.GameObjects.Image, pos?: Phaser.Math.Vector2, angle?: number, decisionController?: DecisionController, visualController?: VisualController): Unit {
+        const unit = new Unit(this.idCounter, spec, pos, angle, sprite, decisionController, visualController);
         this.units.set(this.idCounter, unit);
         this.idCounter++;
         return unit;
@@ -40,7 +42,7 @@ export class World {
         }
     }
 
-    applyIntent(unit: Unit, intent: Intent, _dt: number) {
+    applyMoveIntent(unit: Unit, intent: MoveIntent, _dt: number) {
         switch (intent.type) {
             case 'MoveTo': {
                 const speed = Math.min(intent.speed ?? unit.spec.maxSpeed, unit.spec.maxSpeed);
@@ -59,6 +61,15 @@ export class World {
             }
             case 'Idle': {
                 unit.setSpeed(0);
+                break;
+            }
+            case 'RandomWalk': {
+                const ANGLE_COEFFICIENT = 0.03;
+                const SPEED_COEFFICIENT = 0.3;
+                const speed = Math.min(intent.speed ?? unit.spec.maxSpeed * SPEED_COEFFICIENT, unit.spec.maxSpeed);
+                unit.setSpeed(speed);
+                const randomAngle = Phaser.Math.FloatBetween(-Math.PI, Math.PI) * ANGLE_COEFFICIENT;
+                unit.setAngle(unit.getAngle() + randomAngle);
                 break;
             }
             case 'SameAsBefore': {
@@ -88,6 +99,10 @@ export class World {
 
     getUnitIterator(): IterableIterator<Readonly<Unit>> {
         return this.units.values();
+    }
+
+    getScene(): Phaser.Scene {
+        return this.scene;
     }
 
 }

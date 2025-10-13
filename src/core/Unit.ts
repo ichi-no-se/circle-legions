@@ -2,15 +2,22 @@ import Phaser from 'phaser';
 import { World } from './World';
 
 
-export type Intent = { type: 'MoveTo'; point: Phaser.Math.Vector2; speed?: number; }
+export type MoveIntent = { type: 'MoveTo'; point: Phaser.Math.Vector2; speed?: number; }
     | { type: 'MoveVel'; vel: Phaser.Math.Vector2; }
     | { type: 'Idle' }
+    | { type: 'RandomWalk'; speed?: number; }
     | { type: 'SameAsBefore' };
 
-export interface Controller {
+export interface DecisionController {
     bind(owner: Unit): void;
-    update(dt: number, world: World): Intent;
+    update(dt: number, world: World): MoveIntent;
 }
+
+export interface VisualController{
+    bind(owner: Unit): void;
+    update(dt: number, world: World): void;
+}
+
 export interface UnitSpec {
     maxHp: number;
     maxSpeed: number;
@@ -30,9 +37,10 @@ export class Unit {
     private speed: number;
     private hp: number;
     private alive: boolean;
-    private controller: Controller | null;
+    private decisionController: DecisionController | null;
+    private visualController: VisualController | null;
 
-    constructor(id: number, spec: UnitSpec, pos?: Phaser.Math.Vector2, angle?: number, sprite?: Phaser.GameObjects.Image, controller?: Controller) {
+    constructor(id: number, spec: UnitSpec, pos?: Phaser.Math.Vector2, angle?: number, sprite?: Phaser.GameObjects.Image, decisionController?: DecisionController, visualController?: VisualController) {
         this.id = id;
         this.spec = spec;
         this.pos = pos?.clone() ?? new Phaser.Math.Vector2();
@@ -41,19 +49,32 @@ export class Unit {
         this.hp = spec.maxHp;
         this.alive = true;
         this.sprite = sprite ?? null;
-        this.controller = controller ?? null;
-        if (this.controller) {
-            this.controller.bind(this);
+        this.decisionController = decisionController ?? null;
+        if (this.decisionController) {
+            this.decisionController.bind(this);
+        }
+        this.visualController = visualController ?? null;
+        if (this.visualController) {
+            this.visualController.bind(this);
         }
     }
 
     setSprite(sprite: Phaser.GameObjects.Image) {
+        if (this.sprite) {
+            this.sprite.destroy();
+        }
         this.sprite = sprite;
+        this.syncRender();
     }
 
-    bindController(controller: Controller) {
-        this.controller = controller;
-        this.controller.bind(this);
+    bindDecisionController(controller: DecisionController) {
+        this.decisionController = controller;
+        this.decisionController.bind(this);
+    }
+
+    bindVisualController(controller: VisualController) {
+        this.visualController = controller;
+        this.visualController.bind(this);
     }
 
     setPos(pos: Phaser.Math.Vector2) {
@@ -68,8 +89,12 @@ export class Unit {
         this.speed = speed;
     }
 
-    getController(): Controller | null {
-        return this.controller;
+    getDecisionController(): DecisionController | null {
+        return this.decisionController;
+    }
+
+    getVisualController(): VisualController | null {
+        return this.visualController;
     }
 
     getPos(): Phaser.Math.Vector2 {
@@ -112,35 +137,14 @@ export class Unit {
             this.sprite.destroy();
             this.sprite = null;
         }
-        this.controller = null;
+        this.decisionController = null;
     }
 
     update(dt: number, world: World) {
-        const intent = this.controller?.update(dt, world) ?? { type: 'Idle' };
-        world.applyIntent(this, intent, dt);
+        const intent = this.decisionController?.update(dt, world) ?? { type: 'Idle' };
+        world.applyMoveIntent(this, intent, dt);
         world.applyMovement(this, dt);
+        this.visualController?.update(dt, world);
     }
-
-    /*
-    update(delta: number, world: World) {
-        if (this.currentSpeed > this.spec.maxSpeed) {
-            this.currentSpeed = this.spec.maxSpeed;
-        }
-
-        // TODO 攻撃とか
-        // 攻撃対象が近くにいるとか
-        // 死んでいるならとか
-
-        // TODO 世界との相互作用
-        // 沼地だと速度が落ちるとか？どうしようね
-        const velocity = new Phaser.Math.Vector2().setAngle(this.angle).scale(this.currentSpeed);
-        this.pos.add(velocity.clone().scale(delta / 1000));
-        // TODO: 世界との相互作用（障害物判定など）
-
-        if (this.sprite) {
-            this.sprite.setPosition(this.pos.x, this.pos.y);
-            this.sprite.setRotation(this.angle);
-        }
-    }*/
 
 }

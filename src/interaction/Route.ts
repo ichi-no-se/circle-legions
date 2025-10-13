@@ -1,6 +1,5 @@
 import Phaser from "phaser";
-import type { Intent } from "../input/InputService";
-
+import type { InputIntent } from "../input/InputService";
 
 export interface RouteConfig {
 	thresholdMouseMove: number;
@@ -34,7 +33,7 @@ export class Route {
 		this.points.push(point);
 	}
 
-	update(intent: Intent) {
+	update(intent: InputIntent) {
 		this.addPoint(intent.pos.clone());
 		this.draw();
 	}

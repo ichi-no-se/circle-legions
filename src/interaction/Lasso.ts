@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import type { Intent } from '../input/InputService';
+import type { InputIntent } from '../input/InputService';
 
 export interface LassoConfig {
 	thresholdMouseMove: number;
@@ -92,7 +92,7 @@ export class Lasso {
 		return true;
 	}
 
-	update(intent: Intent) {
+	update(intent: InputIntent) {
 		this.mousePos.set(intent.pos.x, intent.pos.y);
 		if (this.evalNextPoint(this.mousePos)) {
 			this.points.push(this.mousePos.clone());

@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 
-export interface Intent {
+export interface InputIntent {
 	pos: Phaser.Math.Vector2;
 	isDown: boolean;
 	isJustDown: boolean;
@@ -8,7 +8,7 @@ export interface Intent {
 }
 
 export class InputService {
-	readonly intent: Intent;
+	readonly intent: InputIntent;
 	private scene: Phaser.Scene;
 
 	constructor(scene: Phaser.Scene) {
