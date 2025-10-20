@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { type DecisionController, type VisualController, Unit, type MoveIntent } from '../core/Unit';
 import { World } from '../core/World';
 import { createArrowTexture } from "../util/Textures";
+import { HPBar } from '../ui/HPBar';
 
 
 export class EnemyDecisionControllerChase implements DecisionController {
@@ -48,17 +49,41 @@ export class EnemyDecisionControllerChase implements DecisionController {
 
 export class EnemyVisualController implements VisualController {
     private owner!: Unit;
+    private characterSprite!: Phaser.GameObjects.Image;
+    private hpBar!: HPBar;
+    private static readonly OFFSET_HP_BAR = new Phaser.Math.Vector2(0, -25);
 
-    bind(owner: Unit): void {
+    bind(owner: Unit, scene: Phaser.Scene): void {
         this.owner = owner;
+        this.updateCharacterSprite(scene);
+        this.hpBar = new HPBar(scene);
     }
 
     update(dt: number, world: World): void {
         const scene = world.getScene();
+        this.updateCharacterSprite(scene);
+        const hpBarPos = this.owner.getPos().add(EnemyVisualController.OFFSET_HP_BAR);
+        this.hpBar.setPosition(hpBarPos.x, hpBarPos.y);
+        const hpRatio = this.owner.getHp() / this.owner.spec.maxHp;
+        this.hpBar.setRatio(hpRatio);
+    }
+
+    destroy(): void {
+        this.characterSprite.destroy();
+        this.hpBar.destroy();
+    }
+
+    updateCharacterSprite(scene: Phaser.Scene) {
+        if (this.characterSprite) {
+            this.characterSprite.destroy();
+        }
         const fillColor = 0x888888;
         let strokeColor = 0xffffff;
         const textureKey = createArrowTexture(scene, { width: 12, height: 10, fillColor: fillColor, strokeColor: strokeColor, strokeWidth: 1 })
-        const sprite = scene.add.image(this.owner.getPos().x, this.owner.getPos().y, textureKey).setOrigin(0.5);
-        this.owner.setSprite(sprite);
+        this.characterSprite = scene.add.image(this.owner.getPos().x, this.owner.getPos().y, textureKey).setOrigin(0.5);
+        const pos = this.owner.getPos();
+        this.characterSprite.setPosition(pos.x, pos.y);
+        this.characterSprite.setRotation(this.owner.getAngle());
     }
+
 }

@@ -13,9 +13,10 @@ export interface DecisionController {
     update(dt: number, world: World): MoveIntent;
 }
 
-export interface VisualController{
-    bind(owner: Unit): void;
+export interface VisualController {
+    bind(owner: Unit, scene: Phaser.Scene): void;
     update(dt: number, world: World): void;
+    destroy(): void;
 }
 
 export interface UnitSpec {
@@ -29,7 +30,6 @@ export interface UnitSpec {
 }
 
 export class Unit {
-    private sprite: Phaser.GameObjects.Image | null;
     readonly id: number;
     readonly spec: UnitSpec;
     private pos: Phaser.Math.Vector2;
@@ -37,10 +37,11 @@ export class Unit {
     private speed: number;
     private hp: number;
     private alive: boolean;
+    private attackTimer: number;
     private decisionController: DecisionController | null;
     private visualController: VisualController | null;
 
-    constructor(id: number, spec: UnitSpec, pos?: Phaser.Math.Vector2, angle?: number, sprite?: Phaser.GameObjects.Image, decisionController?: DecisionController, visualController?: VisualController) {
+    constructor(scene: Phaser.Scene, id: number, spec: UnitSpec, pos?: Phaser.Math.Vector2, angle?: number, decisionController?: DecisionController, visualController?: VisualController) {
         this.id = id;
         this.spec = spec;
         this.pos = pos?.clone() ?? new Phaser.Math.Vector2();
@@ -48,23 +49,15 @@ export class Unit {
         this.speed = 0;
         this.hp = spec.maxHp;
         this.alive = true;
-        this.sprite = sprite ?? null;
+        this.attackTimer = Phaser.Math.FloatBetween(0, spec.attackInterval);
         this.decisionController = decisionController ?? null;
         if (this.decisionController) {
             this.decisionController.bind(this);
         }
         this.visualController = visualController ?? null;
         if (this.visualController) {
-            this.visualController.bind(this);
+            this.visualController.bind(this, scene);
         }
-    }
-
-    setSprite(sprite: Phaser.GameObjects.Image) {
-        if (this.sprite) {
-            this.sprite.destroy();
-        }
-        this.sprite = sprite;
-        this.syncRender();
     }
 
     bindDecisionController(controller: DecisionController) {
@@ -72,9 +65,9 @@ export class Unit {
         this.decisionController.bind(this);
     }
 
-    bindVisualController(controller: VisualController) {
+    bindVisualController(controller: VisualController, scene: Phaser.Scene) {
         this.visualController = controller;
-        this.visualController.bind(this);
+        this.visualController.bind(this, scene);
     }
 
     setPos(pos: Phaser.Math.Vector2) {
@@ -87,6 +80,14 @@ export class Unit {
 
     setSpeed(speed: number) {
         this.speed = speed;
+    }
+
+    setHp(hp: number) {
+        this.hp = hp;
+    }
+
+    setAttackTimer(timer: number) {
+        this.attackTimer = timer;
     }
 
     getDecisionController(): DecisionController | null {
@@ -113,11 +114,15 @@ export class Unit {
         return this.hp;
     }
 
+    getAttackTimer(): number {
+        return this.attackTimer;
+    }
+
     isAlive(): boolean {
         return this.alive;
     }
 
-    takeDamage(damage: number) {
+    applyDamage(damage: number) {
         this.hp -= damage;
         if (this.hp <= 0) {
             this.hp = 0;
@@ -125,25 +130,20 @@ export class Unit {
         }
     }
 
-    syncRender() {
-        if (this.sprite) {
-            this.sprite.setPosition(this.pos.x, this.pos.y);
-            this.sprite.setRotation(this.angle);
-        }
-    }
-
     destroy() {
-        if (this.sprite) {
-            this.sprite.destroy();
-            this.sprite = null;
-        }
+        this.visualController?.destroy();
         this.decisionController = null;
+        this.visualController = null;
     }
 
     update(dt: number, world: World) {
+        if (this.attackTimer > 0) {
+            this.attackTimer -= dt;
+        }
         const intent = this.decisionController?.update(dt, world) ?? { type: 'Idle' };
         world.applyMoveIntent(this, intent, dt);
         world.applyMovement(this, dt);
+        world.handleAttack(this, dt);
         this.visualController?.update(dt, world);
     }
 

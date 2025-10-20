@@ -13,8 +13,8 @@ export class World {
         this.scene = scene;
     }
 
-    addUnit(spec: UnitSpec, sprite?: Phaser.GameObjects.Image, pos?: Phaser.Math.Vector2, angle?: number, decisionController?: DecisionController, visualController?: VisualController): Unit {
-        const unit = new Unit(this.idCounter, spec, pos, angle, sprite, decisionController, visualController);
+    addUnit(spec: UnitSpec, pos?: Phaser.Math.Vector2, angle?: number, decisionController?: DecisionController, visualController?: VisualController): Unit {
+        const unit = new Unit(this.scene,this.idCounter, spec, pos, angle, decisionController, visualController);
         this.units.set(this.idCounter, unit);
         this.idCounter++;
         return unit;
@@ -37,7 +37,9 @@ export class World {
         for (const unit of this.units.values()) {
             if (unit.isAlive()) {
                 unit.update(dt, this);
-                unit.syncRender();
+            }
+            else{
+                this.removeUnit(unit.id);
             }
         }
     }
@@ -79,6 +81,17 @@ export class World {
         }
     }
 
+    handleAttack(unit: Unit, dt: number) {
+        if (unit.getAttackTimer() > 0) {
+            return;
+        }
+        const target = this.queryAliveNearestUnit(unit.getPos(), unit.spec.attackRange, unit.spec.faction === 'Player' ? 'Enemy' : 'Player');
+        if (target) {
+            target.applyDamage(unit.spec.attackDamage);
+            unit.setAttackTimer(unit.spec.attackInterval);
+        }
+    }
+
     applyMovement(unit: Unit, dt: number) {
         const angle = unit.getAngle();
         const speed = Math.min(unit.getSpeed(), unit.spec.maxSpeed);
@@ -88,13 +101,34 @@ export class World {
         unit.setPos(new Phaser.Math.Vector2(pos.x + dx, pos.y + dy));
     }
 
-    queryUnitsInRange(pos: Phaser.Math.Vector2, range: number): Readonly<Unit>[] {
-        // QuadTreeとかにしたいね そのうち使うかも
+    queryAliveUnitsInRange(pos: Phaser.Math.Vector2, range: number): Readonly<Unit>[] {
+        // QuadTreeとかにしたいね
         return Array.from(this.units.values()).filter(unit => {
             const unitPos = unit.getPos();
             const distance = Phaser.Math.Distance.Between(pos.x, pos.y, unitPos.x, unitPos.y);
-            return distance <= range;
+            return distance <= range && unit.isAlive();
         });
+    }
+
+    queryAliveNearestUnit(pos: Phaser.Math.Vector2, range: number, factionFilter?: UnitSpec["faction"]): Readonly<Unit> | null {
+        // QuadTreeとかにしたいね
+        const unitsInRange = this.queryAliveUnitsInRange(pos, range).filter(unit => {
+            if (factionFilter) {
+                return unit.spec.faction === factionFilter;
+            }
+            return true;
+        });
+        let nearestUnit: Readonly<Unit> | null = null;
+        let nearestDistance = Number.MAX_VALUE;
+        for (const unit of unitsInRange) {
+            const unitPos = unit.getPos();
+            const distance = Phaser.Math.Distance.Between(pos.x, pos.y, unitPos.x, unitPos.y);
+            if (distance < nearestDistance) {
+                nearestDistance = distance;
+                nearestUnit = unit;
+            }
+        }
+        return nearestUnit;
     }
 
     getUnitIterator(): IterableIterator<Readonly<Unit>> {

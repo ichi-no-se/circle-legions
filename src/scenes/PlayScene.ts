@@ -29,7 +29,7 @@ export class PlayScene extends Phaser.Scene {
             for (let j = 0; j < 5; j++) {
                 const x = 100 + i * 40;
                 const y = 100 + j * 100;
-                this.world.addUnit({ maxHp: 100, maxSpeed: 10, detectRange: 100, attackRange: 100, attackInterval: 1, attackDamage: 10, faction: "Player" }, undefined, new Phaser.Math.Vector2(x, y), 0, new PlayerDecisionController(), new PlayerVisualController());
+                this.world.addUnit({ maxHp: 100, maxSpeed: 10, detectRange: 100, attackRange: 80, attackInterval: 1, attackDamage: 20, faction: "Player" }, new Phaser.Math.Vector2(x, y), 0, new PlayerDecisionController(), new PlayerVisualController());
             }
         }
 
@@ -37,7 +37,7 @@ export class PlayScene extends Phaser.Scene {
             for (let j = 0; j < 5; j++) {
                 const x = 700 - i * 40;
                 const y = 500 - j * 100;
-                this.world.addUnit({ maxHp: 100, maxSpeed: 10, detectRange: 100, attackRange: 100, attackInterval: 1, attackDamage: 10, faction: "Enemy" }, undefined, new Phaser.Math.Vector2(x, y), Math.PI, new EnemyDecisionControllerChase(), new EnemyVisualController());
+                this.world.addUnit({ maxHp: 100, maxSpeed: 10, detectRange: 100, attackRange: 80, attackInterval: 1, attackDamage: 20, faction: "Enemy" }, new Phaser.Math.Vector2(x, y), Math.PI, new EnemyDecisionControllerChase(), new EnemyVisualController());
             }
         }
 
