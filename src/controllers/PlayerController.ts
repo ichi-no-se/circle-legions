@@ -95,6 +95,7 @@ export class PlayerVisualController implements VisualController {
     private characterSprite!: Phaser.GameObjects.Image;
     private hpBar!: HPBar;
     private isSelected: boolean = false;
+    private routeGraphics!: Phaser.GameObjects.Graphics;
     private static readonly OFFSET_HP_BAR = new Phaser.Math.Vector2(0, -25);
 
 
@@ -102,6 +103,7 @@ export class PlayerVisualController implements VisualController {
         this.owner = owner;
         this.updateCharacterSprite(scene);
         this.hpBar = new HPBar(scene);
+        this.routeGraphics = scene.add.graphics();
     }
 
     update(dt: number, world: World): void {
@@ -111,11 +113,13 @@ export class PlayerVisualController implements VisualController {
         this.hpBar.setPosition(hpBarPos.x, hpBarPos.y);
         const hpRatio = this.owner.getHp() / this.owner.spec.maxHp;
         this.hpBar.setRatio(hpRatio);
+        this.updateRouteGraphics();
     }
 
     destroy(): void {
         this.characterSprite.destroy();
         this.hpBar.destroy();
+        this.routeGraphics.destroy();
     }
 
     updateCharacterSprite(scene: Phaser.Scene): void {
@@ -139,6 +143,26 @@ export class PlayerVisualController implements VisualController {
         const pos = this.owner.getPos();
         this.characterSprite.setPosition(pos.x, pos.y);
         this.characterSprite.setRotation(this.owner.getAngle());
+    }
+
+    updateRouteGraphics(): void {
+        this.routeGraphics.clear();
+        const decisionController = this.owner.getDecisionController();
+        if (decisionController instanceof PlayerDecisionController) {
+            if (decisionController.isRouteComplete()) {
+                return;
+            }
+            const points = decisionController['targetPoints'];
+            const currentIndex = decisionController['currentTargetIndex'];
+            this.routeGraphics.lineStyle(2, 0xff0000, 0.2);
+            this.routeGraphics.beginPath();
+            this.routeGraphics.moveTo(this.owner.getPos().x, this.owner.getPos().y);
+            for (let i = currentIndex; i < points.length; i++) {
+                const p = points[i];
+                this.routeGraphics.lineTo(p.x, p.y);
+            }
+            this.routeGraphics.strokePath();
+        }
     }
 
     setSelected(selected: boolean) {

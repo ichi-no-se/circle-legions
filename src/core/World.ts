@@ -51,7 +51,7 @@ export class World {
                 const to = intent.point;
                 const from = unit.getPos();
                 unit.setSpeed(speed);
-                unit.setAngle(Phaser.Math.Angle.Between(from.x, from.y, to.x, to.y));
+                unit.setAngle(Phaser.Math.Angle.Between(from.x, from.y, to.x, to.y) );
                 break;
             }
             case 'MoveVel': {
@@ -66,11 +66,11 @@ export class World {
                 break;
             }
             case 'RandomWalk': {
-                const ANGLE_COEFFICIENT = 0.03;
                 const SPEED_COEFFICIENT = 0.3;
+                const RANDOM_ANGLE_COEFFICIENT = 0.03;
                 const speed = Math.min(intent.speed ?? unit.spec.maxSpeed * SPEED_COEFFICIENT, unit.spec.maxSpeed);
                 unit.setSpeed(speed);
-                const randomAngle = Phaser.Math.FloatBetween(-Math.PI, Math.PI) * ANGLE_COEFFICIENT;
+                const randomAngle = Phaser.Math.FloatBetween(-Math.PI, Math.PI) * RANDOM_ANGLE_COEFFICIENT;
                 unit.setAngle(unit.getAngle() + randomAngle);
                 break;
             }
