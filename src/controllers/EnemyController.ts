@@ -79,7 +79,7 @@ export class EnemyVisualController implements VisualController {
         }
         const fillColor = 0x888888;
         let strokeColor = 0xffffff;
-        const textureKey = createArrowTexture(scene, { width: 12, height: 10, fillColor: fillColor, strokeColor: strokeColor, strokeWidth: 1 })
+        const textureKey = createArrowTexture(scene, { width: 20, height: 15, fillColor: fillColor, strokeColor: strokeColor, strokeWidth: 1 })
         this.characterSprite = scene.add.image(this.owner.getPos().x, this.owner.getPos().y, textureKey).setOrigin(0.5);
         const pos = this.owner.getPos();
         this.characterSprite.setPosition(pos.x, pos.y);

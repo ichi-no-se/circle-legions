@@ -22,6 +22,7 @@ export interface VisualController {
 export interface UnitSpec {
     maxHp: number;
     maxSpeed: number;
+    intersectRange: number;
     detectRange: number;
     attackRange: number;
     attackInterval: number;

@@ -5,6 +5,7 @@ import { InputService } from "../input/InputService";
 import { World } from "../core/World";
 import { PlayerDecisionController, PlayerVisualController } from "../controllers/PlayerController";
 import { EnemyDecisionControllerChase, EnemyVisualController } from "../controllers/EnemyController";
+import { LineObstacle } from "../core/Obstacle";
 
 export class PlayScene extends Phaser.Scene {
     private inputService!: InputService;
@@ -29,7 +30,7 @@ export class PlayScene extends Phaser.Scene {
             for (let j = 0; j < 5; j++) {
                 const x = 100 + i * 40;
                 const y = 100 + j * 100;
-                this.world.addUnit({ maxHp: 100, maxSpeed: 10, detectRange: 100, attackRange: 80, attackInterval: 1, attackDamage: 20, faction: "Player" }, new Phaser.Math.Vector2(x, y), 0, new PlayerDecisionController(), new PlayerVisualController());
+                this.world.addUnit({ maxHp: 100, maxSpeed: 10, intersectRange: 10, detectRange: 100, attackRange: 80, attackInterval: 1, attackDamage: 20, faction: "Player" }, new Phaser.Math.Vector2(x, y), 0, new PlayerDecisionController(), new PlayerVisualController());
             }
         }
 
@@ -37,9 +38,17 @@ export class PlayScene extends Phaser.Scene {
             for (let j = 0; j < 5; j++) {
                 const x = 700 - i * 40;
                 const y = 500 - j * 100;
-                this.world.addUnit({ maxHp: 100, maxSpeed: 10, detectRange: 100, attackRange: 80, attackInterval: 1, attackDamage: 20, faction: "Enemy" }, new Phaser.Math.Vector2(x, y), Math.PI, new EnemyDecisionControllerChase(), new EnemyVisualController());
+                this.world.addUnit({ maxHp: 100, maxSpeed: 10, intersectRange: 10, detectRange: 100, attackRange: 80, attackInterval: 1, attackDamage: 20, faction: "Enemy" }, new Phaser.Math.Vector2(x, y), Math.PI, new EnemyDecisionControllerChase(), new EnemyVisualController());
             }
         }
+
+        const obstacles = [];
+        obstacles.push(new LineObstacle(300, 100, 300, 500, 0xffffff, 2, this));
+        obstacles.push(new LineObstacle(350, 100, 350, 500, 0xffffff, 2, this));
+        obstacles.push(new LineObstacle(300, 100, 350, 100, 0xffffff, 2, this));
+        obstacles.push(new LineObstacle(300, 500, 350, 500, 0xffffff, 2, this));
+
+        this.world.addObstacles(obstacles);
 
         // T キーで TitleScene へ遷移する例（データを渡す）
         this.input.keyboard?.once("keydown-T", () => {

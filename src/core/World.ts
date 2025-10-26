@@ -1,20 +1,31 @@
 import Phaser from 'phaser';
 import { Unit } from './Unit';
 import type { MoveIntent, VisualController, DecisionController, UnitSpec } from './Unit';
+import type { Obstacle } from "./Obstacle";
 
 export class World {
     private units: Map<number, Unit>;
     private idCounter: number;
     private scene: Phaser.Scene;
+    private obstacles: Obstacle[];
 
     constructor(scene: Phaser.Scene) {
         this.units = new Map();
         this.idCounter = 0;
         this.scene = scene;
+        this.obstacles = [];
+    }
+
+    addObstacle(obstacle: Obstacle): void {
+        this.obstacles.push(obstacle);
+    }
+
+    addObstacles(obstacles: Obstacle[]): void {
+        this.obstacles.push(...obstacles);
     }
 
     addUnit(spec: UnitSpec, pos?: Phaser.Math.Vector2, angle?: number, decisionController?: DecisionController, visualController?: VisualController): Unit {
-        const unit = new Unit(this.scene,this.idCounter, spec, pos, angle, decisionController, visualController);
+        const unit = new Unit(this.scene, this.idCounter, spec, pos, angle, decisionController, visualController);
         this.units.set(this.idCounter, unit);
         this.idCounter++;
         return unit;
@@ -38,9 +49,12 @@ export class World {
             if (unit.isAlive()) {
                 unit.update(dt, this);
             }
-            else{
+            else {
                 this.removeUnit(unit.id);
             }
+        }
+        for (const obstacle of this.obstacles) {
+            obstacle.update();
         }
     }
 
@@ -51,7 +65,7 @@ export class World {
                 const to = intent.point;
                 const from = unit.getPos();
                 unit.setSpeed(speed);
-                unit.setAngle(Phaser.Math.Angle.Between(from.x, from.y, to.x, to.y) );
+                unit.setAngle(Phaser.Math.Angle.Between(from.x, from.y, to.x, to.y));
                 break;
             }
             case 'MoveVel': {
@@ -99,6 +113,42 @@ export class World {
         const dy = Math.sin(angle) * speed * dt;
         const pos = unit.getPos();
         unit.setPos(new Phaser.Math.Vector2(pos.x + dx, pos.y + dy));
+        // 衝突判定
+        const intersectPoints: Phaser.Math.Vector2[] = [];
+        // 障害物
+        for (const obstacle of this.obstacles) {
+            const points = obstacle.intersectPoints(unit.getPos(), unit.spec.intersectRange);
+            intersectPoints.push(...points);
+        }
+        // 他ユニット
+        for (const otherUnit of this.units.values()) {
+            if (otherUnit.id === unit.id) continue;
+            if (!otherUnit.isAlive()) continue;
+            const points = Phaser.Geom.Intersects.GetCircleToCircle(
+                new Phaser.Geom.Circle(unit.getPos().x, unit.getPos().y, unit.spec.intersectRange),
+                new Phaser.Geom.Circle(otherUnit.getPos().x, otherUnit.getPos().y, otherUnit.spec.intersectRange)
+            );
+            intersectPoints.push(...points);
+        }
+        if (intersectPoints.length > 0) {
+            let dir = new Phaser.Math.Vector2(0, 0);
+            for (const point of intersectPoints) {
+                const unitCenter = unit.getPos();
+                const toUnit = new Phaser.Math.Vector2(unitCenter.x - point.x, unitCenter.y - point.y);
+                const distance = toUnit.length();
+                if (distance > 0) {
+                    toUnit.normalize();
+                    const strength = 1 / distance;
+                    dir.add(toUnit.scale(strength));
+                }
+            }
+            dir.normalize();
+            const OBSTACLE_PUSH_COEFFICIENT = 0.5;
+            unit.setPos(new Phaser.Math.Vector2(
+                unit.getPos().x + dir.x * OBSTACLE_PUSH_COEFFICIENT,
+                unit.getPos().y + dir.y * OBSTACLE_PUSH_COEFFICIENT
+            ));
+        }
     }
 
     queryAliveUnitsInRange(pos: Phaser.Math.Vector2, range: number): Readonly<Unit>[] {
@@ -133,6 +183,10 @@ export class World {
 
     getUnitIterator(): IterableIterator<Readonly<Unit>> {
         return this.units.values();
+    }
+
+    getObstacleIterator(): IterableIterator<Obstacle> {
+        return this.obstacles.values();
     }
 
     getScene(): Phaser.Scene {
