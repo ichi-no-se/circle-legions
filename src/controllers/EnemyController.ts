@@ -50,12 +50,14 @@ export class EnemyDecisionControllerChase implements DecisionController {
 export class EnemyVisualController implements VisualController {
     private owner!: Unit;
     private characterSprite!: Phaser.GameObjects.Image;
+    private currentTextureKey!: string;
     private hpBar!: HPBar;
     private static readonly OFFSET_HP_BAR = new Phaser.Math.Vector2(0, -25);
 
     bind(owner: Unit, scene: Phaser.Scene): void {
         this.owner = owner;
-        this.updateCharacterSprite(scene);
+        this.currentTextureKey = this.getTextureKey(scene);
+        this.characterSprite = scene.add.image(this.owner.getPos().x, this.owner.getPos().y, this.currentTextureKey).setOrigin(0.5);
         this.hpBar = new HPBar(scene);
     }
 
@@ -73,17 +75,21 @@ export class EnemyVisualController implements VisualController {
         this.hpBar.destroy();
     }
 
-    updateCharacterSprite(scene: Phaser.Scene) {
-        if (this.characterSprite) {
-            this.characterSprite.destroy();
+    private updateCharacterSprite(scene: Phaser.Scene) {
+        const textureKey = this.getTextureKey(scene);
+        if (this.currentTextureKey !== textureKey) {
+            this.currentTextureKey = textureKey;
+            this.characterSprite.setTexture(this.currentTextureKey).setOrigin(0.5);
         }
-        const fillColor = 0x888888;
-        let strokeColor = 0xffffff;
-        const textureKey = createArrowTexture(scene, { width: 20, height: 15, fillColor: fillColor, strokeColor: strokeColor, strokeWidth: 1 })
-        this.characterSprite = scene.add.image(this.owner.getPos().x, this.owner.getPos().y, textureKey).setOrigin(0.5);
         const pos = this.owner.getPos();
         this.characterSprite.setPosition(pos.x, pos.y);
         this.characterSprite.setRotation(this.owner.getAngle());
     }
 
+    private getTextureKey(scene: Phaser.Scene): string {
+        const fillColor = 0x888888;
+        let strokeColor = 0xffffff;
+        const newTextureKey = createArrowTexture(scene, { width: 20, height: 15, fillColor: fillColor, strokeColor: strokeColor, strokeWidth: 1 });
+        return newTextureKey;
+    }
 }
