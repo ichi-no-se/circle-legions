@@ -5,7 +5,7 @@ import { InputService } from "../input/InputService";
 import { World } from "../core/World";
 import { PlayerDecisionController, PlayerVisualController } from "../controllers/PlayerController";
 import { EnemyDecisionControllerChase, EnemyVisualController } from "../controllers/EnemyController";
-import { LineObstacle } from "../core/Obstacle";
+import { LineObstacle,CircleObstacle,RectangleObstacle } from "../core/Obstacle";
 
 export class PlayScene extends Phaser.Scene {
     private inputService!: InputService;
@@ -43,10 +43,13 @@ export class PlayScene extends Phaser.Scene {
         }
 
         const obstacles = [];
-        obstacles.push(new LineObstacle(300, 100, 300, 500, 0xffffff, 2, this));
-        obstacles.push(new LineObstacle(350, 100, 350, 500, 0xffffff, 2, this));
-        obstacles.push(new LineObstacle(300, 100, 350, 100, 0xffffff, 2, this));
-        obstacles.push(new LineObstacle(300, 500, 350, 500, 0xffffff, 2, this));
+        obstacles.push(new LineObstacle(300, 100, 300, 500, 0xffffff, 1.0, 2, this));
+        obstacles.push(new LineObstacle(350, 100, 350, 500, 0xffffff, 1.0, 2, this));
+        obstacles.push(new LineObstacle(300, 100, 350, 100, 0xffffff, 0.5, 2, this));
+        obstacles.push(new LineObstacle(300, 500, 350, 500, 0xffffff, 0.2, 2, this));
+
+        obstacles.push(new RectangleObstacle(400, 100, 50, 200, 0xff0000, 1.0, this));
+        obstacles.push(new CircleObstacle(600, 400, 30, 0x00ff00, 1.0, this));
 
         this.world.addObstacles(obstacles);
 
