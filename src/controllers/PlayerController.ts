@@ -22,6 +22,10 @@ export class PlayerDecisionController implements DecisionController {
     update(dt: number, world: World): MoveIntent {
         this.distanceTraveledOnSegment += this.owner.spec.maxSpeed * dt;
         this.enemySearchTimer -= dt;
+        while (!this.isRouteComplete() && this.distanceTraveledOnSegment >= this.targetVectors[this.currentSegmentIndex].length()) {
+            this.distanceTraveledOnSegment -= this.targetVectors[this.currentSegmentIndex].length();
+            this.currentSegmentIndex++;
+        }
         while (this.enemySearchTimer <= 0) {
             this.enemySearchTimer += PlayerDecisionController.ENEMY_SEARCH_INTERVAL;
             let nearestEnemy = world.queryAliveNearestUnit(this.owner.getPos(), this.owner.spec.detectRange, 'Enemy');
@@ -40,10 +44,6 @@ export class PlayerDecisionController implements DecisionController {
             else {
                 return { type: 'MoveTo', point: enemy.getPos(), speed: this.owner.spec.maxSpeed };
             }
-        }
-        while (!this.isRouteComplete() && this.distanceTraveledOnSegment >= this.targetVectors[this.currentSegmentIndex].length()) {
-            this.distanceTraveledOnSegment -= this.targetVectors[this.currentSegmentIndex].length();
-            this.currentSegmentIndex++;
         }
         if (this.isRouteComplete()) {
             return { type: 'RandomWalk' };
