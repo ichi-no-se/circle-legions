@@ -9,11 +9,8 @@ export class TitleScene extends Phaser.Scene {
         this.add.text(16, 16, "TitleScene (Press SPACE)", { color: "#fff" });
 
         this.input.keyboard?.once("keydown-SPACE", () => {
-            this.scene.start("PlayScene", { message: "from Title" });
+            this.scene.start("PlayScene", { stage: 1 });
         });
-
-        // HUDを同時起動したい時の例:
-        // this.scene.launch("HudScene", { … });
-        // this.scene.moveAbove("HudScene", "TitleScene");
     }
 }
+

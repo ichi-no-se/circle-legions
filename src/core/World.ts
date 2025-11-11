@@ -193,4 +193,21 @@ export class World {
         return this.scene;
     }
 
+    enemyUnitsAllDead(): boolean {
+        for (const unit of this.units.values()) {
+            if (unit.spec.faction === 'Enemy' && unit.isAlive()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    allyUnitsAllDead(): boolean {
+        for (const unit of this.units.values()) {
+            if (unit.spec.faction === 'Player' && unit.isAlive()) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

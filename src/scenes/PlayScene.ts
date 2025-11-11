@@ -5,7 +5,7 @@ import { InputService } from "../input/InputService";
 import { World } from "../core/World";
 import { PlayerDecisionController, PlayerVisualController } from "../controllers/PlayerController";
 import { EnemyDecisionControllerChase, EnemyVisualController } from "../controllers/EnemyController";
-import { LineObstacle,CircleObstacle,RectangleObstacle } from "../core/Obstacle";
+import { LineObstacle, CircleObstacle, RectangleObstacle } from "../core/Obstacle";
 
 export class PlayScene extends Phaser.Scene {
     private inputService!: InputService;
@@ -20,7 +20,7 @@ export class PlayScene extends Phaser.Scene {
     }
 
     // シーンのセットアップ
-    create() {
+    create(data: {stage: number}) {
         this.world = new World(this);
         this.inputService = new InputService(this);
         this.cameras.main.setBackgroundColor(0x101015);
