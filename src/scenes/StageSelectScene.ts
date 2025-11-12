@@ -14,9 +14,9 @@ export class StageSelectScene extends Phaser.Scene {
 			color: "#ffffff"
 		}).setOrigin(0.5);
 
-		const stages = ["Stage 1", "Stage 2", "Stage 3"];
+		const stages = ["Stage 1", "Stage 2", "Stage 3", "Stage 4", "Stage 5"];
 		stages.forEach((stage, index) => {
-			const stageButton = createButton(this, stage, this.cameras.main.width / 2, 250 + index * 80);
+			const stageButton = createButton(this, stage, this.cameras.main.width / 2, 180 + index * 60);
 			stageButton.on('pointerdown', () => {
 				this.scene.start("PlayScene", { stage: index + 1 });
 			});

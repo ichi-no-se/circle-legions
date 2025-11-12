@@ -49,13 +49,17 @@ export class CircleObstacle implements Obstacle {
 	private radius: number;
 	private color: number;
 	private alpha: number;
+	private thickness: number;
+	private lineAlpha: number;
 	private graphics: Phaser.GameObjects.Graphics;
 
-	constructor(x: number, y: number, radius: number, color: number, alpha: number, scene: Phaser.Scene) {
+	constructor(x: number, y: number, radius: number, color: number, alpha: number, thickness: number, lineAlpha: number, scene: Phaser.Scene) {
 		this.center = new Phaser.Math.Vector2(x, y);
 		this.radius = radius;
 		this.color = color;
 		this.alpha = alpha;
+		this.thickness = thickness;
+		this.lineAlpha = lineAlpha;
 		this.graphics = new Phaser.GameObjects.Graphics(scene);
 		scene.add.existing(this.graphics);
 		this.draw();
@@ -74,7 +78,9 @@ export class CircleObstacle implements Obstacle {
 	draw(): void {
 		this.graphics.clear();
 		this.graphics.fillStyle(this.color, this.alpha);
+		this.graphics.lineStyle(this.thickness, this.color, this.lineAlpha);
 		this.graphics.fillCircle(this.center.x, this.center.y, this.radius);
+		this.graphics.strokeCircle(this.center.x, this.center.y, this.radius);
 	}
 
 	destroy(): void {
@@ -86,12 +92,16 @@ export class RectangleObstacle implements Obstacle {
 	private rect: Phaser.Geom.Rectangle;
 	private color: number;
 	private alpha: number;
+	private thickness: number;
+	private lineAlpha: number;
 	private graphics: Phaser.GameObjects.Graphics;
 
-	constructor(x: number, y: number, width: number, height: number, color: number, alpha: number, scene: Phaser.Scene) {
+	constructor(x: number, y: number, width: number, height: number, color: number, alpha: number, thickness: number, lineAlpha: number, scene: Phaser.Scene) {
 		this.rect = new Phaser.Geom.Rectangle(x, y, width, height);
 		this.color = color;
 		this.alpha = alpha;
+		this.thickness = thickness;
+		this.lineAlpha = lineAlpha;
 		this.graphics = new Phaser.GameObjects.Graphics(scene);
 		scene.add.existing(this.graphics);
 		this.draw();
@@ -109,7 +119,9 @@ export class RectangleObstacle implements Obstacle {
 	draw(): void {
 		this.graphics.clear();
 		this.graphics.fillStyle(this.color, this.alpha);
+		this.graphics.lineStyle(this.thickness, this.color, this.lineAlpha);
 		this.graphics.fillRectShape(this.rect);
+		this.graphics.strokeRectShape(this.rect);
 	}
 
 	destroy(): void {

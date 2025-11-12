@@ -23,7 +23,7 @@ export class ResultScene extends Phaser.Scene {
         }).setOrigin(0.5);
 
         if (data.didWin) {
-            if (data.stage < 3) {
+            if (data.stage < 5) {
                 const nextStageButton = createButton(this, "Next Stage", this.cameras.main.width / 2, 400);
                 nextStageButton.on('pointerdown', () => {
                     this.scene.start("PlayScene", { stage: data.stage + 1 });

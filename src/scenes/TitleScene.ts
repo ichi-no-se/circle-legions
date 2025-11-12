@@ -8,7 +8,7 @@ export class TitleScene extends Phaser.Scene {
     create() {
         this.cameras.main.setBackgroundColor(0x0b0b12);
 
-        this.add.text(this.cameras.main.width / 2, 100, "CIRCLE LEGIONS", {
+        this.add.text(this.cameras.main.width / 2, 100, "Legion's Path", {
             fontSize: "64px",
             color: "#ffffff"
         }).setOrigin(0.5);
