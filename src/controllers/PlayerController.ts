@@ -160,7 +160,7 @@ export class PlayerVisualController implements VisualController {
 
     private getTextureKey(scene: Phaser.Scene): string {
         const fillColor = this.isSelected ? 0x00ff00 : 0xffff00;
-        let strokeColor = 0xffffff;
+        let strokeColor = 0xffff00;
         const decisionController = this.owner.getDecisionController();
         if (decisionController instanceof PlayerDecisionController) {
             if (decisionController.getCurrentEnemyId() !== null) {
@@ -170,7 +170,7 @@ export class PlayerVisualController implements VisualController {
                 strokeColor = 0xff00ff;
             }
         }
-        const newTextureKey = createArrowTexture(scene, { width: 20, height: 15, fillColor: fillColor, strokeColor: strokeColor, strokeWidth: 1 });
+        const newTextureKey = createArrowTexture(scene, { width: 20, height: 15, fillColor: fillColor, strokeColor: strokeColor, strokeWidth: 1.5 });
         return newTextureKey;
     }
 }
