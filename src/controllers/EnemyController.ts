@@ -61,7 +61,7 @@ export class EnemyVisualController implements VisualController {
         this.hpBar = new HPBar(scene);
     }
 
-    update(dt: number, world: World): void {
+    update(_dt: number, world: World): void {
         const scene = world.getScene();
         this.updateCharacterSprite(scene);
         const hpBarPos = this.owner.getPos().add(EnemyVisualController.OFFSET_HP_BAR);
