@@ -10,7 +10,6 @@ export class PlayerDecisionController implements DecisionController {
     private targetVectors: Phaser.Math.Vector2[] = [];
     private currentSegmentIndex: number = 0;
     private distanceTraveledOnSegment: number = 0;
-    private static readonly THRESHOLD_REACHED = 4;
     private static readonly ENEMY_SEARCH_INTERVAL = 0.5;
     private enemySearchTimer: number = Phaser.Math.Between(0, PlayerDecisionController.ENEMY_SEARCH_INTERVAL);
     private currentEnemyId: number | null = null;
