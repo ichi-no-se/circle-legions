@@ -102,7 +102,7 @@ export class PlayerVisualController implements VisualController {
         this.routeGraphics = scene.add.graphics();
     }
 
-    update(dt: number, world: World): void {
+    update(_dt: number, world: World): void {
         const scene = world.getScene();
         this.updateCharacterSprite(scene);
         const hpBarPos = this.owner.getPos().add(PlayerVisualController.OFFSET_HP_BAR);

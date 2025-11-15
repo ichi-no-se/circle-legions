@@ -97,7 +97,7 @@ export class World {
         }
     }
 
-    handleAttack(unit: Unit, dt: number) {
+    handleAttack(unit: Unit, _dt: number) {
         if (unit.getAttackTimer() > 0) {
             return;
         }
