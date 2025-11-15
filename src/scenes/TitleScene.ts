@@ -1,19 +1,26 @@
 // src/scenes/TitleScene.ts
 import Phaser from "phaser";
-
+import { createButton } from "../ui/Button";
 export class TitleScene extends Phaser.Scene {
-    constructor() { super({ key: "TitleScene" }); }
-
+    constructor() {
+        super({ key: "TitleScene" });
+    }
     create() {
         this.cameras.main.setBackgroundColor(0x0b0b12);
-        this.add.text(16, 16, "TitleScene (Press SPACE)", { color: "#fff" });
 
-        this.input.keyboard?.once("keydown-SPACE", () => {
-            this.scene.start("PlayScene", { message: "from Title" });
+        this.add.text(this.cameras.main.width / 2, 100, "Legion's Path", {
+            fontSize: "64px",
+            color: "#ffffff"
+        }).setOrigin(0.5);
+
+        const stageSelectButton = createButton(this, "Stage Select", this.cameras.main.width / 2, 350);
+        stageSelectButton.on('pointerdown', () => {
+            this.scene.start("StageSelectScene");
         });
 
-        // HUDを同時起動したい時の例:
-        // this.scene.launch("HudScene", { … });
-        // this.scene.moveAbove("HudScene", "TitleScene");
+        const howToPlayButton = createButton(this, "How To Play", this.cameras.main.width / 2, 450);
+        howToPlayButton.on('pointerdown', () => {
+            this.scene.start("HowToPlayScene");
+        });
     }
 }
