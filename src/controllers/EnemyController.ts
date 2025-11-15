@@ -89,7 +89,7 @@ export class EnemyVisualController implements VisualController {
     private getTextureKey(scene: Phaser.Scene): string {
         const fillColor = 0x888888;
         let strokeColor = 0xffffff;
-        const newTextureKey = createArrowTexture(scene, { width: 20, height: 15, fillColor: fillColor, strokeColor: strokeColor, strokeWidth: 1 });
+        const newTextureKey = createArrowTexture(scene, { width: 20, height: 15, fillColor: fillColor, strokeColor: strokeColor, strokeWidth: 2 });
         return newTextureKey;
     }
 }
