@@ -189,10 +189,10 @@ export class PlayScene extends Phaser.Scene {
         this.inputService.endFrame();
         this.world.update(_delta);
         if (this.world.enemyUnitsAllDead()) {
-            this.scene.start("ResultScene", { stage: this.stage, didWin: true, time: this.world.getElapsedTime() });
+            this.scene.start("ResultScene", { stage: this.stage, didWin: true, time: this.world.getElapsedTimeSecond() });
         }
         if (this.world.allyUnitsAllDead()) {
-            this.scene.start("ResultScene", { stage: this.stage, didWin: false, time: this.world.getElapsedTime() });
+            this.scene.start("ResultScene", { stage: this.stage, didWin: false, time: this.world.getElapsedTimeSecond() });
         }
     }
 }

@@ -8,14 +8,14 @@ export class World {
     private idCounter: number;
     private scene: Phaser.Scene;
     private obstacles: Obstacle[];
-    private startTime: number;
+    private elapsedTime: number;
 
     constructor(scene: Phaser.Scene) {
         this.units = new Map();
         this.idCounter = 0;
         this.scene = scene;
         this.obstacles = [];
-        this.startTime = scene.time.now;
+        this.elapsedTime = 0;
     }
 
     addObstacle(obstacle: Obstacle): void {
@@ -46,6 +46,7 @@ export class World {
     }
 
     update(deltaMillis: number) {
+        this.elapsedTime += deltaMillis;
         const dt = deltaMillis / 1000;
         for (const unit of this.units.values()) {
             if (unit.isAlive()) {
@@ -213,7 +214,7 @@ export class World {
         return true;
     }
 
-    getElapsedTime(): number {
-        return (this.scene.time.now - this.startTime) / 1000;
+    getElapsedTimeSecond(): number {
+        return this.elapsedTime / 1000;
     }
 }
